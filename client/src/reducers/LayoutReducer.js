@@ -108,6 +108,13 @@ const selectChat = chat => async (dispatch, getState) => {
 
     dispatch(setMessages(conversation));
     dispatch(setFetchingMessages(false));
+
+    setInterval(async () => {
+      const res = await getConversation(chatId)
+      const { reslt } = res;
+      const { cnversation } = reslt;
+      dispatch(setMessages(cnversation));
+    }, 1000)
   } catch (err) {
     console.log(err);
     dispatch(setFetchingMessages(false));
