@@ -1,0 +1,42 @@
+.alert-bar {
+	height: 70px;
+	width: 100%;
+	background-color: transparent;
+	position: absolute;
+	left: 0;
+	right: 0;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	transition: 0.7s ease all;
+}
+
+.alert-bar > div {
+	width: auto;
+	height: 60px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	padding: 5px 40px;
+	box-sizing: border-box;
+	border-radius: 4px;
+	position: relative;
+}
+
+.alert-bar > div > p {
+	color: #fff;
+	font-size: 16px;
+}
+
+.alert-bar > div > button {
+	background-color: transparent;
+	position: absolute;
+	top: 0;
+	right: 5px;
+	border: none;
+	padding: 3px;
+	outline: none;
+	cursor: pointer;
+	color: #fff;
+	font-size: 16px;
+}
