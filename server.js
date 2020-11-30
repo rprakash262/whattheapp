@@ -70,7 +70,7 @@ io.on('connection', (socket) => {
       newMessage.id = msgId;
 
       socket.broadcast.emit('receive-msg', newMessage);
-      res.status(200).json({ success: true });
+      // res.status(200).json({ success: true });
     } catch (err) {
       console.error(err);
       res.status(500).json({ success: false, result: 'Something went wrong' });
