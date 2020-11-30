@@ -55,7 +55,7 @@ class LoginPage extends React.Component {
 									value={loginFields.pin}
 									name="pin"
 									type="password"
-									placeholder="Enter 4 digit PIN"
+									placeholder="Enter 6 digit PIN"
 									onChange={e => changeLoginForm('pin', e.target.value)}
 								/>
 							</div>
