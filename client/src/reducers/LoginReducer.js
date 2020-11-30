@@ -55,13 +55,11 @@ const changeRegisterForm = (fieldName, value) => (dispatch, getState) => {
 
 const login = e => async (dispatch, getState) => {
   e.preventDefault();
-  dispatch(setLogging(true));
   
   const { loginFields } = getState().login;
   const { number, pin } = loginFields;
 
   if (!number || !pin) {
-    dispatch(setLogging(false));
     dispatch(setAlert(true, 'danger', 'All fields are required'));
 
     return setTimeout(() => {
@@ -69,6 +67,8 @@ const login = e => async (dispatch, getState) => {
     }, 2000);
   }
 
+  dispatch(setLogging(true));
+  
   try {
     const response = await loginUser(number, pin);
 
@@ -101,19 +101,27 @@ const login = e => async (dispatch, getState) => {
 
 const register = e => async (dispatch, getState) => {
   e.preventDefault();
-  dispatch(setRegistering(true));
 
   const { registerFields } = getState().login;
   const { number, name, pin } = registerFields;
 
   if (!number || !name || !pin) {
-    dispatch(setRegistering(false));
     dispatch(setAlert(true, 'danger', 'All fields are required'));
 
     return setTimeout(() => {
       return dispatch(setAlert(false, 'danger', 'All fields are required'));
     }, 2000);
   }
+
+  if (pin.length !== 6) {
+    dispatch(setAlert(true, 'danger', 'PIN should be 6 digit only'));
+
+    return setTimeout(() => {
+      return dispatch(setAlert(false, 'danger', 'PIN should be 6 digit only'));
+    }, 2000);
+  }
+  
+  dispatch(setRegistering(true));
 
   try {
     const response = await registerUser(name, number, pin);
