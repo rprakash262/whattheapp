@@ -17,7 +17,7 @@ class TextBox extends React.Component {
 		const { textMsg, isSendingMsg } = pageProps;
 
 		return (
-			<form onSubmit={isSendingMsg ? () => {} : sendMsg}>
+			<form onSubmit={isSendingMsg ? null : sendMsg}>
 				<div className="text-box">
 					<input
 						placeholder="Enter message..."
@@ -26,7 +26,7 @@ class TextBox extends React.Component {
 					/>
 					<button
 						className="send-btn"
-						onClick={isSendingMsg ? () => {} : sendMsg}
+						onClick={isSendingMsg ? null : sendMsg}
 					>
 						<ArrowForwardIosIcon />
 					</button>
