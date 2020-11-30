@@ -191,7 +191,9 @@ const sendMsg = e => async (dispatch, getState) => {
 
   try {
     // await postConversation(selectedChatId, userId, textMsg, new Date());
-    socket.emit('send-msg', { selectedChatId, userId, textMsg, time: new Date(), msgId: id });
+    const response = await socket.emit('send-msg', { selectedChatId, userId, textMsg, time: new Date(), msgId: id });
+
+    console.log({response})
     messages.push(newMsg);
     dispatch(setMessages(messages));
     dispatch(changeTextMsg(''));
