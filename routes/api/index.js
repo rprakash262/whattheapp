@@ -253,8 +253,8 @@ router.post('/post-conversation', passport.authenticate('jwt', { session: false 
 
   try {
     const response = await Conversation.updateOne({ chatId: chatId }, { $addToSet: { conversation: newMessage } });
-
-    res.status(200).json({ success: true });
+    console.log(response);
+    res.status(200).json({ success: true, result: response });
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, result: 'Something went wrong' });

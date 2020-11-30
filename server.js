@@ -1,10 +1,13 @@
 const express = require('express');
+const router = express.Router();
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const passport = require('passport');
 const path = require('path');
 var http = require('http');
 const socket = require('socket.io');
+
+const Conversation = require('./models/Conversation');
 
 options={
   cors:true,
@@ -48,31 +51,48 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 const server = http.Server(app);
-// var io = socket(server, options);
-// io.listen(server);
+var io = socket(server, options);
+io.listen(server);
 
 // let interval;
 
-// io.on('connection', (socket) => {
-// 	console.log('A user connected');
+io.on('connection', (socket) => {
+  socket.on('send-msg', async ({ selectedChatId: chatId, userId: authorId, textMsg: message, time, msgId }) => {
+    const newMessage = {
+      author: authorId,
+      message,
+      time,
+    };
 
-// 	if (interval) {
-// 	    clearInterval(interval);
-//   	}
+    try {
+      await Conversation.updateOne({ chatId: chatId }, { $addToSet: { conversation: newMessage } });
 
-// 	interval = setInterval(() => getApiAndEmit(socket), 5000);
+      newMessage.id = msgId;
 
-// 	socket.on("disconnect", () => {
-// 	    console.log("Client disconnected");
-// 	    clearInterval(interval);
-// 	});
-// });
+      socket.broadcast.emit('receive-msg', newMessage);
+      res.status(200).json({ success: true });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ success: false, result: 'Something went wrong' });
+    }
+  })
+	// if (interval) {
+	//     clearInterval(interval);
+ //  	}
 
-// const getApiAndEmit = socket => {
-//   const response = new Date();
-//   // Emitting a new message. Will be consumed by the client
-//   socket.emit("FromAPI", response);
-// };
+	// interval = setInterval(() => getApiAndEmit(socket), 5000);
+
+	// socket.on("disconnect", () => {
+	//     console.log("Client disconnected");
+	//     clearInterval(interval);
+	// });
+});
+
+const getApiAndEmit = socket => {
+  const response = new Date();
+  // Emitting a new message. Will be consumed by the client
+  socket.emit("FromAPI", response);
+};
 
 const port = process.env.PORT || 5000;
 

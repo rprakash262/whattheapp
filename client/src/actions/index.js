@@ -151,6 +151,6 @@ export const postConversation = async (chatId, authorId, message, time) => {
   );
 
   const { data } = response;
-
+  console.log({response, data})
   return data;
 };

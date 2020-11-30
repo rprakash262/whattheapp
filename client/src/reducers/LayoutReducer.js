@@ -1,3 +1,5 @@
+import socketIOClient from "socket.io-client";
+
 import {
   getFriends,
   getUserDetails,
@@ -7,7 +9,10 @@ import {
   postConversation,
 } from '../actions';
 import { getUserCookie, deleteCookie } from '../cookie';
-import { setCurrentUser } from './LoginReducer'
+import { setCurrentUser } from './LoginReducer';
+
+const ENDPOINT = "http://localhost:5000";
+const socket = socketIOClient(ENDPOINT);
 
 const INIT = 'LayoutReducer/INIT';
 const SET_SELECTED_CHAT_ID = 'LayoutReducer/SET_SELECTED_CHAT_ID';
@@ -23,6 +28,7 @@ const SET_MESSAGES = 'LayoutReducer/SET_MESSAGES';
 const SET_FETCHING_MESSAGES = 'LayoutReducer/SET_FETCHING_MESSAGES';
 const SET_USER_ID = 'LayoutReducer/SET_USER_ID';
 const TOGGLE_LEFT_HEADER_DROPDOWN = 'LayoutReducer/TOGGLE_LEFT_HEADER_DROPDOWN';
+const IS_SENDING_MSG = 'LayoutReducer/IS_SENDING_MSG';
 
 const setSelectedChatId = chatId => ({ type: SET_SELECTED_CHAT_ID, chatId });
 const setSelectedChat = chat => ({ type: SET_SELECTED_CHAT, chat });
@@ -37,6 +43,7 @@ const setMessages = messages => ({ type: SET_MESSAGES, messages });
 const setFetchingMessages = bool => ({ type: SET_FETCHING_MESSAGES, bool });
 const setUserId = userId => ({ type: SET_USER_ID, userId });
 const toggleLeftHeaderDropdown = bool => ({ type: TOGGLE_LEFT_HEADER_DROPDOWN, bool });
+const sendingMsg = bool => ({ type: IS_SENDING_MSG, bool });
 
 const defaultState = {
   loadingApp: true,
@@ -52,6 +59,7 @@ const defaultState = {
   fetchingMessages: false,
   userId: '',
   leftHeaderDropdown: false,
+  isSendingMsg: false,
 };
 
 const randomIdGenerator = txt => {
@@ -95,12 +103,17 @@ const init = () => async (dispatch, getState) => {
 
 const selectChat = chat => async (dispatch, getState) => {
   const { chatId } = chat;
+
   dispatch(setFetchingMessages(true));
-  // const { activeChats } = getState().layout;
-  // const selectedChat = activeChats.find(d => d.chatId === chatId);
   dispatch(setSelectedChatId(chatId));
   dispatch(setSelectedChat(chat));
   
+  socket.on('receive-msg', newMsg => {
+    const { messages } = getState().layout;
+    messages.push(newMsg);
+    dispatch(setMessages(messages));
+  });
+
   try {
     const response = await getConversation(chatId);
     const { result } = response;
@@ -162,7 +175,7 @@ const selectSuggestion = user => async (dispatch, getState) => {
 
 const sendMsg = e => async (dispatch, getState) => {
   e.preventDefault();
-  
+  dispatch(sendingMsg(true));
   const { textMsg, selectedChatId, messages } = getState().layout;
   const user = JSON.parse(getUserCookie('user'));
   const { userId } = user;
@@ -177,12 +190,15 @@ const sendMsg = e => async (dispatch, getState) => {
   };
 
   try {
-    await postConversation(selectedChatId, userId, textMsg, new Date());
+    // await postConversation(selectedChatId, userId, textMsg, new Date());
+    socket.emit('send-msg', { selectedChatId, userId, textMsg, time: new Date(), msgId: id });
     messages.push(newMsg);
     dispatch(setMessages(messages));
     dispatch(changeTextMsg(''));
+    dispatch(sendingMsg(true));
   } catch (err) {
     console.log(err);
+    dispatch(sendingMsg(true));
   }
 }
 
@@ -239,6 +255,8 @@ function LayoutReducer(state = defaultState, action) {
       return Object.assign({}, state, { userId: action.userId });
     case TOGGLE_LEFT_HEADER_DROPDOWN:
       return Object.assign({}, state, { leftHeaderDropdown: action.bool });
+    case IS_SENDING_MSG:
+      return Object.assign({}, state, { isSendingMsg: action.bool });
     default:
       return state;
   }
