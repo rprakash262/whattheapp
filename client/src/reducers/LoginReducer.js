@@ -128,7 +128,11 @@ const register = e => async (dispatch, getState) => {
 
     if (!response.success) {
       dispatch(setRegistering(false));
-      return alert(response.result);
+      dispatch(setAlert(true, 'danger', response.result));
+
+      return setTimeout(() => {
+        return dispatch(setAlert(false, 'danger', response.result));
+      }, 2000);
     }
 
     const { result: token, } = response;
