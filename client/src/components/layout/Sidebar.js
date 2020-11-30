@@ -25,7 +25,6 @@ class Sidebar extends React.Component {
 					{activeChats.length > 0 &&
 						activeChats.map(chat => (
 						<ChatItem
-							// currentChat={currentChat}
 							active={chat.chatId === selectedChatId}
 							key={chat.chatId}
 							selectChat={() => selectChat(chat)}
@@ -33,14 +32,12 @@ class Sidebar extends React.Component {
 							lastMsg={chat.lastMsg}
 						/>
 					))}
-					{activeChats.length === 0 && 
-						<div className="new-conv">
-							<button onClick={() => toggleModal(true)}>
-								Start New Conversation
-							</button>
-						</div>
-					}
 				</Scrollable>
+				<div className="new-conv">
+					<button onClick={() => toggleModal(true)}>
+						Start New Conversation
+					</button>
+				</div>
 			</div>
 		)
 	}
