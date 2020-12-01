@@ -123,6 +123,7 @@
 .layout-empty-chat-area > p {
 	font-size: 40px;
 	color: #7c9da7;
+	text-align: center;
 }
 
 .layout-chat-area {
@@ -133,4 +134,34 @@
 .layout-text-box {
 	width: 100%;
 	height: 60px;
+}
+
+.layout-header-left-back-btn {
+	display: none;
+}
+
+@media only screen and (max-width: 550px) {
+	.layout-header-left-back-btn {
+		display: block;
+		width: 50px;
+		height: 50px;
+		background-color: #fff;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		border-radius: 4px;
+	}
+
+	.layout-header-left {
+		width: 100%;
+	}
+
+	.layout-header-right {
+		padding: 0;
+		display: none;
+	}
+
+	.layout-sidebar {
+		width: 100%;
+	}
 }

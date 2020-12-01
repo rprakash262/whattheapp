@@ -19,6 +19,8 @@ class Container extends React.Component {
 			searchingNumber,
 			searchingNumberInput,
 			suggestionNumbers,
+			isMobile,
+			view,
 		} = pageProps;
 
 		const {
@@ -34,8 +36,18 @@ class Container extends React.Component {
 					<React.Fragment>
 						<Header pageProps={pageProps} pageActions={pageActions} />
 						<div className="layout-mainarea">
-							<Sidebar pageProps={pageProps} pageActions={pageActions} />
-							<MainContent pageProps={pageProps} pageActions={pageActions} />
+							{!isMobile && (
+								<React.Fragment>
+									<Sidebar pageProps={pageProps} pageActions={pageActions} />
+									<MainContent pageProps={pageProps} pageActions={pageActions} />
+								</React.Fragment>
+							)}
+							{isMobile && view === 'sidebar' && (
+								<Sidebar pageProps={pageProps} pageActions={pageActions} />
+							)}
+							{isMobile && view === 'chatarea' && (
+								<MainContent pageProps={pageProps} pageActions={pageActions} />
+							)}
 						</div>
 					</React.Fragment>
 				}

@@ -117,3 +117,9 @@
 	align-items: center;
 	font-size: 26px;
 }
+
+@media only screen and (max-width: 550px) {
+	.modal-content {
+		min-width: 90%;
+	}
+}

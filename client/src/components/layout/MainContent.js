@@ -27,6 +27,10 @@ class MainContent extends React.Component {
 
 		const { selectedChatId, fetchingMessages } = pageProps;
 
+		const { windowWidth, windowHeight, isMobile } = pageProps;
+
+		console.log({windowWidth, windowHeight, isMobile})
+
 		return (
 			<div className="layout-maincontent">
 				{fetchingMessages && selectedChatId && (

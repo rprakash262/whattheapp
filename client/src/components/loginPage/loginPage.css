@@ -75,3 +75,18 @@
 .one-input > button:hover {
 	background-color: #34768aa8;
 }
+
+/*@media only screen and (max-width: 550px)*/
+@media only screen and (max-width: 550px) {
+	.login-form-container {
+		flex-direction: column;
+	}
+
+	.login-form {
+		width: 100%;
+	}
+
+	.signup-form {
+		width: 100%;
+	}
+}

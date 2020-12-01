@@ -1,5 +1,6 @@
 import React from 'react';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
+import ArrowBackIosIcon from '@material-ui/icons/ArrowBackIos';
 
 import './layout.css'
 
@@ -19,11 +20,22 @@ class Header extends React.Component {
 			logout,
 			showLeftHeaderDropdown,
 			hideLeftHeaderDropdown,
+			backBtnPressed,
 		} = pageActions;
+
+		const { isMobile, view } = pageProps;
 
 		return (
 			<div className="layout-header">
 				<div className="layout-header-left">
+					{isMobile && view === 'chatarea' && (
+						<div
+							className="layout-header-left-back-btn"
+							onClick={backBtnPressed}
+						>
+							<ArrowBackIosIcon style={{ color: '#7c9da7', fontSize: '24px' }} />
+						</div>
+					)}
 					{leftHeaderDropdown && (
 						<div
 							className="layout-header-left-dropdown-panel-overlay"
@@ -35,7 +47,7 @@ class Header extends React.Component {
 							<div onClick={logout}>Logout</div>
 						</div>
 					)}
-					<h4>WhatTheApp</h4>
+					<h4>{view === 'sidebar' && 'WhatTheApp'}{isMobile && view === 'chatarea' && selectedChat.chatName}</h4>
 					<div
 						className="layout-header-left-dropdown-dots"
 						onClick={leftHeaderDropdown ? hideLeftHeaderDropdown : showLeftHeaderDropdown}

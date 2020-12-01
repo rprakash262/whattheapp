@@ -6,7 +6,7 @@ import {
   searchNumbers,
   startChat,
   getConversation,
-  postConversation,
+  // postConversation,
 } from '../actions';
 import { getUserCookie, deleteCookie } from '../cookie';
 import { setCurrentUser } from './LoginReducer';
@@ -16,6 +16,7 @@ const ENDPOINT = 'https://arcane-wildwood-43524.herokuapp.com';
 const socket = socketIOClient(ENDPOINT);
 
 const INIT = 'LayoutReducer/INIT';
+const SET_VIEW = 'LayoutReducer/SET_VIEW';
 const SET_SELECTED_CHAT_ID = 'LayoutReducer/SET_SELECTED_CHAT_ID';
 const SET_SELECTED_CHAT = 'LayoutReducer/SET_SELECTED_CHAT';
 const SET_LOADING_APP = 'LayoutReducer/SET_LOADING_APP';
@@ -32,6 +33,7 @@ const TOGGLE_LEFT_HEADER_DROPDOWN = 'LayoutReducer/TOGGLE_LEFT_HEADER_DROPDOWN';
 const IS_SENDING_MSG = 'LayoutReducer/IS_SENDING_MSG';
 
 const setSelectedChatId = chatId => ({ type: SET_SELECTED_CHAT_ID, chatId });
+const setView = view => ({ type: SET_VIEW, view });
 const setSelectedChat = chat => ({ type: SET_SELECTED_CHAT, chat });
 const setLoadingApp = bool => ({ type: SET_LOADING_APP, bool });
 const toggleModal = bool => ({  type: TOGGLE_MODAL, bool });
@@ -61,6 +63,10 @@ const defaultState = {
   userId: '',
   leftHeaderDropdown: false,
   isSendingMsg: false,
+  windowWidth: window.innerWidth,
+  windowHeight: window.innerHeight,
+  isMobile: window.innerWidth < 1080,
+  view: 'sidebar',
 };
 
 const randomIdGenerator = txt => {
@@ -102,6 +108,11 @@ const init = () => async (dispatch, getState) => {
   }
 }
 
+const backBtnPressed = () => (dispatch, getState) => {
+  dispatch(setSelectedChatId(null));
+  dispatch(setView('sidebar'));
+}
+
 export const scrollToBottom = () => {
   const elm = document.getElementById('scrollBottom');
 
@@ -114,6 +125,7 @@ const selectChat = chat => async (dispatch, getState) => {
   const { chatId } = chat;
 
   dispatch(setFetchingMessages(true));
+  dispatch(setView('chatarea'));
   dispatch(setSelectedChatId(chatId));
   dispatch(setSelectedChat(chat));
   
@@ -231,6 +243,7 @@ export const ACTIONS = {
   showLeftHeaderDropdown : () => toggleLeftHeaderDropdown(true),
   hideLeftHeaderDropdown : () => toggleLeftHeaderDropdown(false),
   logout,
+  backBtnPressed,
 };
 
 const optsToState = apiData => {
@@ -241,6 +254,8 @@ function LayoutReducer(state = defaultState, action) {
   switch (action.type) {
     case INIT:
       return Object.assign({}, state, optsToState(action.opts));
+    case SET_VIEW:
+      return Object.assign({}, state, { view: action.view });
     case SET_SELECTED_CHAT_ID:
       return Object.assign({}, state, { selectedChatId: action.chatId });
     case SET_SELECTED_CHAT:
