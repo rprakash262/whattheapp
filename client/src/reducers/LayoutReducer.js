@@ -11,8 +11,8 @@ import {
 import { getUserCookie, deleteCookie } from '../cookie';
 import { setCurrentUser } from './LoginReducer';
 
-// const ENDPOINT = "http://localhost:5000";
-const ENDPOINT = 'https://arcane-wildwood-43524.herokuapp.com';
+const ENDPOINT = "http://localhost:5000";
+// const ENDPOINT = 'https://arcane-wildwood-43524.herokuapp.com';
 const socket = socketIOClient(ENDPOINT);
 
 const INIT = 'LayoutReducer/INIT';
@@ -102,6 +102,14 @@ const init = () => async (dispatch, getState) => {
   }
 }
 
+export const scrollToBottom = () => {
+  const elm = document.getElementById('scrollBottom');
+
+  if (elm) {
+    elm.scrollTop = elm.scrollHeight;
+  }
+}
+
 const selectChat = chat => async (dispatch, getState) => {
   const { chatId } = chat;
 
@@ -113,6 +121,7 @@ const selectChat = chat => async (dispatch, getState) => {
     const { messages } = getState().layout;
     messages.push(newMsg);
     dispatch(setMessages(messages));
+    scrollToBottom();
   });
 
   try {
@@ -192,16 +201,16 @@ const sendMsg = e => async (dispatch, getState) => {
 
   try {
     // await postConversation(selectedChatId, userId, textMsg, new Date());
-    const response = await socket.emit('send-msg', { selectedChatId, userId, textMsg, time: new Date(), msgId: id });
+    await socket.emit('send-msg', { selectedChatId, userId, textMsg, time: new Date(), msgId: id });
 
-    console.log({response})
     messages.push(newMsg);
     dispatch(setMessages(messages));
+    scrollToBottom();
     dispatch(changeTextMsg(''));
-    dispatch(sendingMsg(true));
+    dispatch(sendingMsg(false));
   } catch (err) {
     console.log(err);
-    dispatch(sendingMsg(true));
+    dispatch(sendingMsg(false));
   }
 }
 

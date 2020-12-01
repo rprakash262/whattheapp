@@ -18,7 +18,7 @@ class ChatArea extends React.Component {
 
 		return (
 			<div className="chat-area-container">
-				<Scrollable>
+				<Scrollable id="scrollBottom">
 					<div className="chat-area">
 						{messages.map((msg, i) => (
 							<ChatBox
