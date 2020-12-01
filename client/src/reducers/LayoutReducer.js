@@ -11,7 +11,8 @@ import {
 import { getUserCookie, deleteCookie } from '../cookie';
 import { setCurrentUser } from './LoginReducer';
 
-const ENDPOINT = "http://localhost:5000";
+// const ENDPOINT = "http://localhost:5000";
+const ENDPOINT = 'https://arcane-wildwood-43524.herokuapp.com';
 const socket = socketIOClient(ENDPOINT);
 
 const INIT = 'LayoutReducer/INIT';
