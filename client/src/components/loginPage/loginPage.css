@@ -77,7 +77,7 @@
 }
 
 /*@media only screen and (max-width: 550px)*/
-@media only screen and (max-width: 550px) {
+@media only screen and (max-width: 1080px) {
 	.login-form-container {
 		flex-direction: column;
 	}

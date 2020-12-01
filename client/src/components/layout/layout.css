@@ -140,7 +140,7 @@
 	display: none;
 }
 
-@media only screen and (max-width: 550px) {
+@media only screen and (max-width: 1080px) {
 	.layout-header-left-back-btn {
 		display: block;
 		width: 50px;

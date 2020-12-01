@@ -118,7 +118,7 @@
 	font-size: 26px;
 }
 
-@media only screen and (max-width: 550px) {
+@media only screen and (max-width: 1080px) {
 	.modal-content {
 		min-width: 90%;
 	}
