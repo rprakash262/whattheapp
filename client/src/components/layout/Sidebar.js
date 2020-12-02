@@ -5,22 +5,20 @@ import ChatItem from '../chatItem';
 import Scrollable from '../scrollable';
 
 class Sidebar extends React.Component {
-	constructor(props) {
-		super(props);
-		this.state = {
-
-		}
-	}
-
 	render() {
 		const { pageProps, pageActions } = this.props;
 		const { activeChats, selectedChatId } = pageProps;
-		const { selectChat, toggleModal } = pageActions;
-
-		console.log({activeChats})
+		const { selectChat, toggleModal, filterChats } = pageActions;
 
 		return (
 			<div className="layout-sidebar">
+				<div className="layout-sidebar-search-chat">
+					<input
+						type="text"
+						placeholder="Search..."
+						onChange={e => filterChats(e.target.value)}
+					/>
+				</div>
 				<Scrollable>
 					{activeChats.length > 0 &&
 						activeChats.map(chat => (

@@ -44,10 +44,14 @@ class Header extends React.Component {
 					)}
 					{leftHeaderDropdown && (
 						<div className="layout-header-left-dropdown-panel">
+							<div onClick={logout}>Profile</div>
 							<div onClick={logout}>Logout</div>
 						</div>
 					)}
-					<h4>{view === 'sidebar' && 'WhatTheApp'}{isMobile && view === 'chatarea' && selectedChat.chatName}</h4>
+					<h4>
+						{(view === 'sidebar' || !isMobile) && 'WhatTheApp'}
+						{isMobile && view === 'chatarea' && selectedChat.chatName}
+					</h4>
 					<div
 						className="layout-header-left-dropdown-dots"
 						onClick={leftHeaderDropdown ? hideLeftHeaderDropdown : showLeftHeaderDropdown}

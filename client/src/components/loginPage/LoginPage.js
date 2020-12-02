@@ -5,13 +5,6 @@ import './loginPage.css';
 import { getUserCookie } from '../../cookie';
 
 class LoginPage extends React.Component {
-	componentDidMount() {
-		const userId = getUserCookie('userId');
-		if (userId) {
-			// window.location.href = '/';
-		}
-	}
-
 	render() {
 		const { pageProps, pageActions } = this.props;
 		const {

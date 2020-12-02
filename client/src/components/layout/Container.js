@@ -5,7 +5,7 @@ import Sidebar from './Sidebar';
 import MainContent from './MainContent';
 import AppLoading from '../appLoading';
 import AlertBar from '../alertBar';
-import Modal from '../modal';
+import SearchModal from '../searchModal';
 
 class Container extends React.Component {
 	render() {
@@ -27,6 +27,7 @@ class Container extends React.Component {
 			toggleModal,
 			changeSearchingNumberInput,
 			selectSuggestion,
+			hideAlert,
 		} = pageActions
 
 		return (
@@ -55,9 +56,10 @@ class Container extends React.Component {
 					showAlert={showAlert}
 					alertType={alertType}
 					alertMsg={alertMsg}
+					hideAlert={hideAlert}
 				/>
 				{showModal &&
-					<Modal
+					<SearchModal
 						hideModal={() => toggleModal(false)}
 						suggestionNumbers={suggestionNumbers}
 						searchingNumberInput={searchingNumberInput}

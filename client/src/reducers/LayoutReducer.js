@@ -1,4 +1,5 @@
 import socketIOClient from "socket.io-client";
+import { cloneDeep } from 'lodash';
 
 import {
   getFriends,
@@ -17,6 +18,7 @@ const socket = socketIOClient(ENDPOINT);
 
 const INIT = 'LayoutReducer/INIT';
 const SET_VIEW = 'LayoutReducer/SET_VIEW';
+const SET_ALERT = 'LayoutReducer/SET_ALERT';
 const SET_SELECTED_CHAT_ID = 'LayoutReducer/SET_SELECTED_CHAT_ID';
 const SET_SELECTED_CHAT = 'LayoutReducer/SET_SELECTED_CHAT';
 const SET_LOADING_APP = 'LayoutReducer/SET_LOADING_APP';
@@ -25,6 +27,7 @@ const SEARCHING_NUM_INPUT = 'LayoutReducer/SEARCHING_NUM_INPUT';
 const SET_SEARCHING_NUMBER = 'LayoutReducer/SET_SEARCHING_NUMBER';
 const SET_SUGGESTION_NUMBERS = 'LayoutReducer/SET_SUGGESTION_NUMBERS';
 const SET_ACTIVE_CHATS = 'LayoutReducer/SET_ACTIVE_CHATS';
+const SET_INITIAL_ACTIVE_CHATS = 'LayoutReducer/SET_INITIAL_ACTIVE_CHATS';
 const CHANGE_TEXT_MSG = 'LayoutReducer/CHANGE_TEXT_MSG';
 const SET_MESSAGES = 'LayoutReducer/SET_MESSAGES';
 const SET_FETCHING_MESSAGES = 'LayoutReducer/SET_FETCHING_MESSAGES';
@@ -33,8 +36,10 @@ const TOGGLE_LEFT_HEADER_DROPDOWN = 'LayoutReducer/TOGGLE_LEFT_HEADER_DROPDOWN';
 const IS_SENDING_MSG = 'LayoutReducer/IS_SENDING_MSG';
 
 const setSelectedChatId = chatId => ({ type: SET_SELECTED_CHAT_ID, chatId });
+const setAlert = (bool, alertType, alertMsg) => ({ type: SET_ALERT, bool, alertType, alertMsg });
 const setView = view => ({ type: SET_VIEW, view });
 const setSelectedChat = chat => ({ type: SET_SELECTED_CHAT, chat });
+const setInitialActiveChats = activeChats => ({ type: SET_INITIAL_ACTIVE_CHATS, activeChats });
 const setLoadingApp = bool => ({ type: SET_LOADING_APP, bool });
 const toggleModal = bool => ({  type: TOGGLE_MODAL, bool });
 const setSearchingNumberInput = num => ({ type: SEARCHING_NUM_INPUT, num });
@@ -49,6 +54,9 @@ const toggleLeftHeaderDropdown = bool => ({ type: TOGGLE_LEFT_HEADER_DROPDOWN, b
 const sendingMsg = bool => ({ type: IS_SENDING_MSG, bool });
 
 const defaultState = {
+  showAlert: false,
+  alertType: '',
+  alertMsg: '',
   loadingApp: true,
   selectedChatId: null,
   selectedChat: {},
@@ -101,6 +109,7 @@ const init = () => async (dispatch, getState) => {
     }
     
     dispatch(setActiveChats(transformedFriendsDetails));
+    dispatch(setInitialActiveChats(transformedFriendsDetails));
     dispatch(setLoadingApp(false));
   } catch (err) {
     console.log(err);
@@ -145,7 +154,12 @@ const selectChat = chat => async (dispatch, getState) => {
     dispatch(setFetchingMessages(false));
   } catch (err) {
     console.log(err);
+    dispatch(setMessages([]));
     dispatch(setFetchingMessages(false));
+    dispatch(setAlert(true, 'danger', 'Something went wrong'));
+    setTimeout(() => {
+      return dispatch(setAlert(false, 'danger', 'Something went wrong'));
+    }, 2000);
   }
 }
 
@@ -226,6 +240,20 @@ const sendMsg = e => async (dispatch, getState) => {
   }
 }
 
+const filterChats = txt => (dispatch, getState) => {
+  const { initialActiveChats } = getState().layout;
+
+  if (!txt) {
+    return dispatch(setActiveChats(initialActiveChats));
+  }
+
+  const clonedChats = cloneDeep(initialActiveChats);
+
+  const filteredChats = clonedChats.filter(d => d.chatName.toLowerCase().includes(txt));
+
+  dispatch(setActiveChats(filteredChats));
+}
+
 const logout = () => {
   deleteCookie();
   setCurrentUser({});
@@ -244,6 +272,7 @@ export const ACTIONS = {
   hideLeftHeaderDropdown : () => toggleLeftHeaderDropdown(false),
   logout,
   backBtnPressed,
+  filterChats,
 };
 
 const optsToState = apiData => {
@@ -254,6 +283,12 @@ function LayoutReducer(state = defaultState, action) {
   switch (action.type) {
     case INIT:
       return Object.assign({}, state, optsToState(action.opts));
+    case SET_ALERT:
+      return Object.assign({}, state, {
+        showAlert: action.bool,
+        alertType: action.alertType,
+        alertMsg: action.alertMsg,
+      });
     case SET_VIEW:
       return Object.assign({}, state, { view: action.view });
     case SET_SELECTED_CHAT_ID:
@@ -272,6 +307,8 @@ function LayoutReducer(state = defaultState, action) {
       return Object.assign({}, state, { suggestionNumbers: action.numbers });
     case SET_ACTIVE_CHATS:
       return Object.assign({}, state, { activeChats: action.activeChats });
+    case SET_INITIAL_ACTIVE_CHATS:
+      return Object.assign({}, state, { initialActiveChats: action.activeChats });
     case CHANGE_TEXT_MSG:
       return Object.assign({}, state, { textMsg: action.textMsg });
     case SET_MESSAGES:

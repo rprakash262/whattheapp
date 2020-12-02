@@ -1,35 +1,13 @@
 import React from 'react';
-// import socketIOClient from "socket.io-client";
 
 import TextBox from '../textBox';
 import ChatArea from '../chatArea';
 
-// const ENDPOINT = "http://localhost:5000";
-
 class MainContent extends React.Component {
-	constructor(props) {
-		super(props);
-		this.state = {
-
-		}
-	}
-
-	// componentDidMount() {
-	// 	const socket = socketIOClient(ENDPOINT);
-		
-	// 	socket.on("FromAPI", data => {
-	//     	console.log(data);
-	//     });
-	// }
-
 	render() {
 		const { pageProps, pageActions } = this.props;
 
 		const { selectedChatId, fetchingMessages } = pageProps;
-
-		const { windowWidth, windowHeight, isMobile } = pageProps;
-
-		console.log({windowWidth, windowHeight, isMobile})
 
 		return (
 			<div className="layout-maincontent">
