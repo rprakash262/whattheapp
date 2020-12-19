@@ -169,9 +169,9 @@ const selectChat = chat => async (dispatch, getState) => {
   try {
     const response = await getConversation(chatId);
     const { result } = response;
-    const { conversation } = result;
+    // const { conversation } = result;
 
-    dispatch(setMessages(conversation));
+    dispatch(setMessages(result));
     dispatch(setFetchingMessages(false));
   } catch (err) {
     console.log(err);
