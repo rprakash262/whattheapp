@@ -1,4 +1,5 @@
 const express = require('express');
+const fileUpload = require('express-fileupload');
 const router = express.Router();
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
@@ -6,6 +7,11 @@ const passport = require('passport');
 const path = require('path');
 var http = require('http');
 const socket = require('socket.io');
+const crypto = require('crypto');
+const GridFsStorage = require('multer-gridfs-storage');
+const Grid = require('gridfs-stream');
+const methodOverride = require('method-override');
+const multer = require('multer');
 
 const Conversation = require('./models/Conversation');
 
@@ -21,6 +27,8 @@ const api = require('./routes/api');
 // body-parser middleware
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+app.use(fileUpload());
+// app.use(methodOverride('_method'));
 
 // DB config
 const db = require('./config/keys').mongoURI;
@@ -28,8 +36,10 @@ const db = require('./config/keys').mongoURI;
 // connect to mongoDB
 mongoose
   .connect(db)
-  .then(() => console.log('Connected to database'))
-  .catch(err => console.error('Error while connecting to database', err));
+  .then(() => {
+    console.log('Connected to database')
+  })
+  .catch(err => console.error('Error while connecting to database====>>>>>>>>>>>>>', err));
 
 // Passport middleware
 app.use(passport.initialize());

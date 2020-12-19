@@ -12,6 +12,11 @@ class Header extends React.Component {
 		}
 	}
 
+	profileClick = () => {
+		this.props.pageActions.toggleProfileModal(true);
+		this.props.pageActions.hideLeftHeaderDropdown();	
+	}
+
 	render() {
 		const { pageProps, pageActions } = this.props;
 
@@ -21,6 +26,7 @@ class Header extends React.Component {
 			showLeftHeaderDropdown,
 			hideLeftHeaderDropdown,
 			backBtnPressed,
+			// toggleProfileModal,
 		} = pageActions;
 
 		const { isMobile, view } = pageProps;
@@ -44,7 +50,7 @@ class Header extends React.Component {
 					)}
 					{leftHeaderDropdown && (
 						<div className="layout-header-left-dropdown-panel">
-							<div onClick={logout}>Profile</div>
+							<div onClick={this.profileClick}>Profile</div>
 							<div onClick={logout}>Logout</div>
 						</div>
 					)}

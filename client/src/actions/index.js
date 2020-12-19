@@ -151,6 +151,21 @@ export const postConversation = async (chatId, authorId, message, time) => {
   );
 
   const { data } = response;
-  console.log({response, data})
+
+  return data;
+};
+
+export const uploadProfileImage = async formData => {
+  const response = await axios.post(
+    `${apiRoot}upload-profile-image`,
+    formData,
+    { headers: {
+      'Content-Type': 'multipart/form-data',
+      // 'Authorization': token,
+    }},
+  );
+
+  const { data } = response;
+
   return data;
 };

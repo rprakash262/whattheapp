@@ -26,6 +26,9 @@ class ChatItem extends React.Component {
 					<h4>{name}</h4>
 					<p>{lastMsg}</p>
 				</div>
+				<div className="chatItem-new-msg">
+					<span>4</span>
+				</div>
 			</div>
 		)
 	}

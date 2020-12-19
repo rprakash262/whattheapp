@@ -31,3 +31,20 @@
 	justify-content: center;
 	align-items: flex-start;
 }
+
+.chatItem-new-msg {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	padding: 0 10px;
+}
+
+.chatItem-new-msg > span {
+	width: 30px;
+	height: 30px;
+	border-radius: 15px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	background-color: honeydew;
+}

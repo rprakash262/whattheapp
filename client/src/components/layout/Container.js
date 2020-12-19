@@ -6,6 +6,7 @@ import MainContent from './MainContent';
 import AppLoading from '../appLoading';
 import AlertBar from '../alertBar';
 import SearchModal from '../searchModal';
+import ProfileModal from '../profileModal';
 
 class Container extends React.Component {
 	render() {
@@ -16,18 +17,23 @@ class Container extends React.Component {
 			alertType,
 			alertMsg,
 			showModal,
+			showProfileModal,
 			searchingNumber,
 			searchingNumberInput,
 			suggestionNumbers,
 			isMobile,
 			view,
+			uploadingProfileImgFile,
 		} = pageProps;
 
 		const {
 			toggleModal,
+			toggleProfileModal,
 			changeSearchingNumberInput,
 			selectSuggestion,
 			hideAlert,
+			submitProfileImgFile,
+			changeProfileImgFile,
 		} = pageActions
 
 		return (
@@ -66,6 +72,14 @@ class Container extends React.Component {
 						searchingNumber={searchingNumber}
 						selectSuggestion={selectSuggestion}
 						changeSearchingNumberInput={changeSearchingNumberInput}
+					/>
+				}
+				{showProfileModal &&
+					<ProfileModal
+						hideModal={() => toggleProfileModal(false)}
+						uploadingProfileImgFile={uploadingProfileImgFile}
+						changeProfileImgFile={changeProfileImgFile}
+						submitProfileImgFile={submitProfileImgFile}
 					/>
 				}
 			</div>

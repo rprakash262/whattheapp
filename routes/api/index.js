@@ -4,11 +4,14 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken')
 const passport = require('passport');
 const jwt_decode = require('jwt-decode');
+const fs = require('fs');
+const path = require('path');
 
 const User = require('../../models/User');
 const Chat = require('../../models/Chat');
 const Conversation = require('../../models/Conversation');
 const keys = require('../../config/keys');
+const upload = require('../../utils/upload');
 
 router.post('/register-user', async (req, res) => {
   const { name, phone, pin } = req.body;
@@ -259,6 +262,37 @@ router.post('/post-conversation', passport.authenticate('jwt', { session: false 
     console.error(err);
     res.status(500).json({ success: false, result: 'Something went wrong' });
   }
+});
+
+// router.post('/upload-profile-image', (req, res) => {
+//   if (req.files === null) {
+//     return res.status(200).json({ success: false, result: 'No file found' });
+//   }
+
+//   const file = req.files.file;
+
+//   console.log(file)
+
+//   const dirPath = path.join(__dirname, `../../client/public/profileImage/${file.name}`)
+
+//   file.mv(dirPath, err => {
+//     if (err) {
+//       return console.error(err);
+//     }
+
+//     const result = {
+//       fileName: file.name,
+//       filePath: `/profileImage/${file.name}`
+//     };
+
+//     res.status(200).json({ success: true, result });
+//   })
+// });
+
+router.post('/upload-profile-image', upload.single('file'), (req, res) => {
+  
+  console.log('==>>')
+  res.json({  file: 'file' });
 });
 
 module.exports = router;

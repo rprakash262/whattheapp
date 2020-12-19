@@ -8,6 +8,7 @@ import {
   startChat,
   getConversation,
   // postConversation,
+  uploadProfileImage,
 } from '../actions';
 import { getUserCookie, deleteCookie } from '../cookie';
 import { setCurrentUser } from './LoginReducer';
@@ -23,6 +24,7 @@ const SET_SELECTED_CHAT_ID = 'LayoutReducer/SET_SELECTED_CHAT_ID';
 const SET_SELECTED_CHAT = 'LayoutReducer/SET_SELECTED_CHAT';
 const SET_LOADING_APP = 'LayoutReducer/SET_LOADING_APP';
 const TOGGLE_MODAL = 'LayoutReducer/TOGGLE_MODAL';
+const TOGGLE_PROFILE_MODAL = 'LayoutReducer/TOGGLE_PROFILE_MODAL';
 const SEARCHING_NUM_INPUT = 'LayoutReducer/SEARCHING_NUM_INPUT';
 const SET_SEARCHING_NUMBER = 'LayoutReducer/SET_SEARCHING_NUMBER';
 const SET_SUGGESTION_NUMBERS = 'LayoutReducer/SET_SUGGESTION_NUMBERS';
@@ -34,6 +36,8 @@ const SET_FETCHING_MESSAGES = 'LayoutReducer/SET_FETCHING_MESSAGES';
 const SET_USER_ID = 'LayoutReducer/SET_USER_ID';
 const TOGGLE_LEFT_HEADER_DROPDOWN = 'LayoutReducer/TOGGLE_LEFT_HEADER_DROPDOWN';
 const IS_SENDING_MSG = 'LayoutReducer/IS_SENDING_MSG';
+const SET_PROFILE_IMG_FILE = 'LayoutReducer/SET_PROFILE_IMG_FILE';
+const SET_UPLOADING_PROFILE_IMG_FILE = 'LayoutReducer/SET_UPLOADING_PROFILE_IMG_FILE';
 
 const setSelectedChatId = chatId => ({ type: SET_SELECTED_CHAT_ID, chatId });
 const setAlert = (bool, alertType, alertMsg) => ({ type: SET_ALERT, bool, alertType, alertMsg });
@@ -42,6 +46,7 @@ const setSelectedChat = chat => ({ type: SET_SELECTED_CHAT, chat });
 const setInitialActiveChats = activeChats => ({ type: SET_INITIAL_ACTIVE_CHATS, activeChats });
 const setLoadingApp = bool => ({ type: SET_LOADING_APP, bool });
 const toggleModal = bool => ({  type: TOGGLE_MODAL, bool });
+const toggleProfileModal = bool => ({  type: TOGGLE_PROFILE_MODAL, bool });
 const setSearchingNumberInput = num => ({ type: SEARCHING_NUM_INPUT, num });
 const setSearchingNumber = bool => ({ type: SET_SEARCHING_NUMBER, bool });
 const setSuggestionNumbers = numbers => ({ type: SET_SUGGESTION_NUMBERS, numbers });
@@ -52,6 +57,8 @@ const setFetchingMessages = bool => ({ type: SET_FETCHING_MESSAGES, bool });
 const setUserId = userId => ({ type: SET_USER_ID, userId });
 const toggleLeftHeaderDropdown = bool => ({ type: TOGGLE_LEFT_HEADER_DROPDOWN, bool });
 const sendingMsg = bool => ({ type: IS_SENDING_MSG, bool });
+const setProfileImgFile = file => ({ type: SET_PROFILE_IMG_FILE, file });
+const setUploadingProfileImgFile = bool => ({ type: SET_UPLOADING_PROFILE_IMG_FILE, bool });
 
 const defaultState = {
   showAlert: false,
@@ -75,6 +82,9 @@ const defaultState = {
   windowHeight: window.innerHeight,
   isMobile: window.innerWidth < 1080,
   view: 'sidebar',
+  showProfileModal: false,
+  file: null,
+  uploadingProfileImgFile: false,
 };
 
 const randomIdGenerator = txt => {
@@ -110,6 +120,14 @@ const init = () => async (dispatch, getState) => {
     
     dispatch(setActiveChats(transformedFriendsDetails));
     dispatch(setInitialActiveChats(transformedFriendsDetails));
+
+    socket.on('receive-msg', newMsg => {
+      const { selectedChatId, messages } = getState().layout;
+      messages.push(newMsg);
+      dispatch(setMessages(messages));
+      scrollToBottom();
+    });
+
     dispatch(setLoadingApp(false));
   } catch (err) {
     console.log(err);
@@ -131,19 +149,22 @@ export const scrollToBottom = () => {
 }
 
 const selectChat = chat => async (dispatch, getState) => {
+  const { selectedChatId } = getState().layout;
   const { chatId } = chat;
+
+  if (selectedChatId === chatId) return;
 
   dispatch(setFetchingMessages(true));
   dispatch(setView('chatarea'));
   dispatch(setSelectedChatId(chatId));
   dispatch(setSelectedChat(chat));
   
-  socket.on('receive-msg', newMsg => {
-    const { messages } = getState().layout;
-    messages.push(newMsg);
-    dispatch(setMessages(messages));
-    scrollToBottom();
-  });
+  // socket.on('receive-msg', newMsg => {
+  //   const { messages } = getState().layout;
+  //   messages.push(newMsg);
+  //   dispatch(setMessages(messages));
+  //   scrollToBottom();
+  // });
 
   try {
     const response = await getConversation(chatId);
@@ -187,6 +208,15 @@ const selectSuggestion = user => async (dispatch, getState) => {
   const currentUser = JSON.parse(getUserCookie('user'));
   const { userId: currentUserId } = currentUser;
   const { activeChats } = getState().layout;
+
+  const chatAlreadyExists = activeChats.find(d => d.userId === userId);
+
+  if (chatAlreadyExists) {
+    dispatch(selectChat(chatAlreadyExists));
+    dispatch(toggleModal(false));
+    dispatch(setSearchingNumberInput(''));
+    return dispatch(setSuggestionNumbers([]));
+  }
 
   try {
     const response = await startChat(currentUserId, userId);
@@ -252,6 +282,42 @@ const filterChats = txt => (dispatch, getState) => {
   const filteredChats = clonedChats.filter(d => d.chatName.toLowerCase().includes(txt));
 
   dispatch(setActiveChats(filteredChats));
+};
+
+const submitProfileImgFile = () => async (dispatch, getState) => {
+  const { file } = getState().layout;
+
+  const formData = new FormData();
+
+  formData.append('file', file);
+
+  try {
+    const res = await uploadProfileImage(formData);
+
+    const { success, result } = res;
+
+    if (success) {
+      const { fileName, filePath } = result;
+      console.log({ fileName, filePath });
+    }
+  } catch (err) {
+    console.log(err);
+  }
+}
+
+const changeProfileImgFile = e => (dispatch, getState) => {
+  const file = e.target.files[0];
+
+  dispatch(setProfileImgFile(file));
+
+  try {
+    dispatch(setUploadingProfileImgFile(true));
+
+    dispatch(setUploadingProfileImgFile(false));
+  } catch (err) {
+    console.log(err);
+    dispatch(setUploadingProfileImgFile(false));
+  }
 }
 
 const logout = () => {
@@ -264,6 +330,7 @@ export const ACTIONS = {
   init,
   selectChat,
   toggleModal,
+  toggleProfileModal,
   changeSearchingNumberInput,
   selectSuggestion,
   changeTextMsg,
@@ -273,6 +340,8 @@ export const ACTIONS = {
   logout,
   backBtnPressed,
   filterChats,
+  changeProfileImgFile,
+  submitProfileImgFile,
 };
 
 const optsToState = apiData => {
@@ -299,6 +368,8 @@ function LayoutReducer(state = defaultState, action) {
       return Object.assign({}, state, { loadingApp: action.bool });
     case TOGGLE_MODAL:
       return Object.assign({}, state, { showModal: action.bool });
+    case TOGGLE_PROFILE_MODAL:
+      return Object.assign({}, state, { showProfileModal: action.bool });
     case SEARCHING_NUM_INPUT:
       return Object.assign({}, state, { searchingNumberInput: action.num });
     case SET_SEARCHING_NUMBER:
@@ -321,6 +392,10 @@ function LayoutReducer(state = defaultState, action) {
       return Object.assign({}, state, { leftHeaderDropdown: action.bool });
     case IS_SENDING_MSG:
       return Object.assign({}, state, { isSendingMsg: action.bool });
+    case SET_PROFILE_IMG_FILE:
+      return Object.assign({}, state, { file: action.file });
+    case SET_UPLOADING_PROFILE_IMG_FILE:
+      return Object.assign({}, state, { uploadingProfileImgFile: action.bool });
     default:
       return state;
   }
