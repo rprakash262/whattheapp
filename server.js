@@ -16,8 +16,8 @@ const multer = require('multer');
 const Conversation = require('./models/Conversation');
 
 options={
-  cors:true,
-  origins:["http://localhost:5000"],
+  cors: true,
+  origins: ["http://localhost:5000"],
 }
 
 const app = express();
@@ -36,9 +36,7 @@ const db = require('./config/keys').mongoURI;
 // connect to mongoDB
 mongoose
   .connect(db)
-  .then(() => {
-    console.log('Connected to database')
-  })
+  .then(() => { console.log('Connected to database') })
   .catch(err => console.error('Error while connecting to database====>>>>>>>>>>>>>', err));
 
 // Passport middleware
@@ -67,15 +65,17 @@ io.listen(server);
 // let interval;
 
 io.on('connection', (socket) => {
+  console.log('User Connected====>>>>>>>>>>>');
+  
   socket.on('send-msg', async ({ selectedChatId: chatId, userId: authorId, textMsg: message, time, msgId }) => {
     const newMessage = {
       author: authorId,
       message,
       time,
     };
-
+    console.log('===============')
     try {
-      await Conversation.updateOne({ chatId: chatId }, { $addToSet: { conversation: newMessage } });
+      await Conversation.updateOne({ chatId }, { $addToSet: { conversation: newMessage } });
 
       newMessage.id = msgId;
 

@@ -72,7 +72,7 @@ const defaultState = {
   searchingNumber: false,
   searchingNumberInput: null,
   suggestionNumbers: [],
-  messages: [],
+  messages: {},
   textMsg: '',
   fetchingMessages: false,
   userId: '',
@@ -123,7 +123,7 @@ const init = () => async (dispatch, getState) => {
 
     socket.on('receive-msg', newMsg => {
       const { selectedChatId, messages } = getState().layout;
-      messages.push(newMsg);
+      messages.conversation.push(newMsg);
       dispatch(setMessages(messages));
       scrollToBottom();
     });
@@ -259,7 +259,7 @@ const sendMsg = e => async (dispatch, getState) => {
     // await postConversation(selectedChatId, userId, textMsg, new Date());
     await socket.emit('send-msg', { selectedChatId, userId, textMsg, time: new Date(), msgId: id });
 
-    messages.push(newMsg);
+    messages.conversation.push(newMsg);
     dispatch(setMessages(messages));
     scrollToBottom();
     dispatch(changeTextMsg(''));

@@ -4,11 +4,11 @@ import { getUserCookie } from '../cookie';
 
 const token = getUserCookie('token');
 
-// const apiRootProduction = 'https://our-chat-a.herokuapp.com/';
+const apiRootProduction = 'https://arcane-wildwood-43524.herokuapp.com/';
 // const apiRootTesting = 'http://192.168.43.95:5000/';
 
-// const apiRoot = apiRootTesting;
-const apiRoot = '';
+const apiRoot = apiRootProduction;
+// const apiRoot = '';
 
 export const registerUser = async (name, phone, pin) => {
 	const response = await axios.post(`${apiRoot}register-user`, {
