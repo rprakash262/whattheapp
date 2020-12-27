@@ -11,7 +11,7 @@ class ChatItem extends React.Component {
 	}
 
 	render() {
-		const { name, lastMsg, selectChat, active } = this.props;
+		const { name, lastMsg, selectChat, active, unread } = this.props;
 
 		return (
 			<div
@@ -26,9 +26,11 @@ class ChatItem extends React.Component {
 					<h4>{name}</h4>
 					<p>{lastMsg}</p>
 				</div>
-				<div className="chatItem-new-msg">
-					<span>4</span>
-				</div>
+				{unread > 0 && false && (
+					<div className="chatItem-new-msg">
+						<span>{unread}</span>
+					</div>
+				)}
 			</div>
 		)
 	}

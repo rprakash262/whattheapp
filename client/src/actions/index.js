@@ -135,6 +135,21 @@ export const getConversation = async chatId => {
   return data;
 };
 
+export const getAllConversations = async chatIds => {
+  const response = await axios.post(
+    `${apiRoot}get-all-conversations`,
+    { chatIds },
+    {headers: {
+      'Content-Type': 'application/json',
+      'Authorization': token,
+    }},
+  );
+
+  const { data } = response;
+
+  return data;
+};
+
 export const postConversation = async (chatId, authorId, message, time) => {
 	const response = await axios.post(
     `${apiRoot}post-conversation`,

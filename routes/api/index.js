@@ -89,23 +89,23 @@ router.post('/login-user', async (req, res) => {
   }
 });
 
-router.get('/get-users', async (req, res) => {
-  try {
-    const users = await User.find();
+// router.get('/get-users', async (req, res) => {
+//   try {
+//     const users = await User.find();
 
-    const transformedUsers = users.map(user => ({
-      id: user._id,
-      phone: user.phone,
-      name: user.name,
-      image: user.image,
-    }));
+//     const transformedUsers = users.map(user => ({
+//       id: user._id,
+//       phone: user.phone,
+//       name: user.name,
+//       image: user.image,
+//     }));
 
-    res.status(200).json({ result: transformedUsers });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ errorMsg: 'Something went wrong' });
-  }
-});
+//     res.status(200).json({ result: transformedUsers });
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({ errorMsg: 'Something went wrong' });
+//   }
+// });
 
 router.post('/get-user-details', passport.authenticate('jwt', { session: false }), async (req, res) => {
   const { userIds } = req.body;
@@ -223,6 +223,25 @@ router.post('/get-chats', async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ errorMsg: 'Something went wrong' });
+  }
+});
+
+router.post('/get-all-conversations', passport.authenticate('jwt', { session: false }), async (req, res) => {
+  const { chatIds } = req.body;
+  
+  try {
+    const conversations = await Conversation.find({ chatId: { $in: chatIds } });
+
+    const transformedConversations = conversations.map(conv => ({
+      conversationId: conv._id,
+      chatId: conv.chatId,
+      conversation: conv.conversation,
+    }));
+
+    res.status(200).json({ success: true, result: transformedConversations });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, result: 'Something went wrong' });
   }
 });
 

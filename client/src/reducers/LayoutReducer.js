@@ -6,15 +6,14 @@ import {
   getUserDetails,
   searchNumbers,
   startChat,
-  getConversation,
-  // postConversation,
+  getAllConversations,
   uploadProfileImage,
 } from '../actions';
 import { getUserCookie, deleteCookie } from '../cookie';
 import { setCurrentUser } from './LoginReducer';
 
-// const ENDPOINT = "http://localhost:5000";
-const ENDPOINT = 'https://arcane-wildwood-43524.herokuapp.com';
+// const ENDPOINT = 'https://arcane-wildwood-43524.herokuapp.com';
+const ENDPOINT = 'http://localhost:5000';
 const socket = socketIOClient(ENDPOINT);
 
 const INIT = 'LayoutReducer/INIT';
@@ -32,7 +31,6 @@ const SET_ACTIVE_CHATS = 'LayoutReducer/SET_ACTIVE_CHATS';
 const SET_INITIAL_ACTIVE_CHATS = 'LayoutReducer/SET_INITIAL_ACTIVE_CHATS';
 const CHANGE_TEXT_MSG = 'LayoutReducer/CHANGE_TEXT_MSG';
 const SET_MESSAGES = 'LayoutReducer/SET_MESSAGES';
-const SET_FETCHING_MESSAGES = 'LayoutReducer/SET_FETCHING_MESSAGES';
 const SET_USER_ID = 'LayoutReducer/SET_USER_ID';
 const TOGGLE_LEFT_HEADER_DROPDOWN = 'LayoutReducer/TOGGLE_LEFT_HEADER_DROPDOWN';
 const IS_SENDING_MSG = 'LayoutReducer/IS_SENDING_MSG';
@@ -53,7 +51,6 @@ const setSuggestionNumbers = numbers => ({ type: SET_SUGGESTION_NUMBERS, numbers
 const setActiveChats = activeChats => ({ type: SET_ACTIVE_CHATS, activeChats });
 const changeTextMsg = textMsg => ({ type: CHANGE_TEXT_MSG, textMsg });
 const setMessages = messages => ({ type: SET_MESSAGES, messages });
-const setFetchingMessages = bool => ({ type: SET_FETCHING_MESSAGES, bool });
 const setUserId = userId => ({ type: SET_USER_ID, userId });
 const toggleLeftHeaderDropdown = bool => ({ type: TOGGLE_LEFT_HEADER_DROPDOWN, bool });
 const sendingMsg = bool => ({ type: IS_SENDING_MSG, bool });
@@ -74,7 +71,6 @@ const defaultState = {
   suggestionNumbers: [],
   messages: {},
   textMsg: '',
-  fetchingMessages: false,
   userId: '',
   leftHeaderDropdown: false,
   isSendingMsg: false,
@@ -121,10 +117,32 @@ const init = () => async (dispatch, getState) => {
     dispatch(setActiveChats(transformedFriendsDetails));
     dispatch(setInitialActiveChats(transformedFriendsDetails));
 
-    socket.on('receive-msg', newMsg => {
-      const { selectedChatId, messages } = getState().layout;
-      messages.conversation.push(newMsg);
-      dispatch(setMessages(messages));
+    const chatIds = transformedFriendsDetails.map(cht => cht.chatId);
+
+    const resp = await getAllConversations(chatIds);
+    const { result: conversations } = resp;
+
+    const messages = {};
+
+    conversations.forEach(d => {
+      messages[d.chatId] = d.conversation;
+    })
+
+    dispatch(setMessages(messages));
+
+    socket.on('receive-msg', ({ newMessage, chatId }) => {
+
+      const { messages } = getState().layout;
+      const clonedMessages = cloneDeep(messages);
+      console.log({newMessage, chatId});
+      
+      if (!clonedMessages[chatId]) {
+        clonedMessages[chatId] = [];
+      }
+
+      clonedMessages[chatId].push(newMessage);
+      dispatch(setMessages(clonedMessages));
+
       scrollToBottom();
     });
 
@@ -149,39 +167,12 @@ export const scrollToBottom = () => {
 }
 
 const selectChat = chat => async (dispatch, getState) => {
-  const { selectedChatId } = getState().layout;
   const { chatId } = chat;
 
-  if (selectedChatId === chatId) return;
-
-  dispatch(setFetchingMessages(true));
-  dispatch(setView('chatarea'));
-  dispatch(setSelectedChatId(chatId));
   dispatch(setSelectedChat(chat));
-  
-  // socket.on('receive-msg', newMsg => {
-  //   const { messages } = getState().layout;
-  //   messages.push(newMsg);
-  //   dispatch(setMessages(messages));
-  //   scrollToBottom();
-  // });
-
-  try {
-    const response = await getConversation(chatId);
-    const { result } = response;
-    // const { conversation } = result;
-
-    dispatch(setMessages(result));
-    dispatch(setFetchingMessages(false));
-  } catch (err) {
-    console.log(err);
-    dispatch(setMessages([]));
-    dispatch(setFetchingMessages(false));
-    dispatch(setAlert(true, 'danger', 'Something went wrong'));
-    setTimeout(() => {
-      return dispatch(setAlert(false, 'danger', 'Something went wrong'));
-    }, 2000);
-  }
+  dispatch(setSelectedChatId(chatId));
+  dispatch(setView('chatarea'));
+  scrollToBottom();
 }
 
 const changeSearchingNumberInput = num => async (dispatch, getState) => {
@@ -248,19 +239,20 @@ const sendMsg = e => async (dispatch, getState) => {
 
   const id = randomIdGenerator(textMsg)
   const newMsg = {
-    id,
+    _id: id,
     author: userId,
     message: textMsg,
     status: 'sent',
     time: new Date(),
   };
 
+  const clonedMessages = cloneDeep(messages);
+
   try {
-    // await postConversation(selectedChatId, userId, textMsg, new Date());
     await socket.emit('send-msg', { selectedChatId, userId, textMsg, time: new Date(), msgId: id });
 
-    messages.conversation.push(newMsg);
-    dispatch(setMessages(messages));
+    clonedMessages[selectedChatId].push(newMsg);
+    dispatch(setMessages(clonedMessages));
     scrollToBottom();
     dispatch(changeTextMsg(''));
     dispatch(sendingMsg(false));
@@ -384,8 +376,6 @@ function LayoutReducer(state = defaultState, action) {
       return Object.assign({}, state, { textMsg: action.textMsg });
     case SET_MESSAGES:
       return Object.assign({}, state, { messages: action.messages });
-    case SET_FETCHING_MESSAGES:
-      return Object.assign({}, state, { fetchingMessages: action.bool });
     case SET_USER_ID:
       return Object.assign({}, state, { userId: action.userId });
     case TOGGLE_LEFT_HEADER_DROPDOWN:

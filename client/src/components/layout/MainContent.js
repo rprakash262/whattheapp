@@ -11,17 +11,17 @@ class MainContent extends React.Component {
 
 		return (
 			<div className="layout-maincontent">
-				{fetchingMessages && selectedChatId && (
+				{/* {fetchingMessages && selectedChatId && (
 					<div className="layout-empty-chat-area">
 						<p>Please wait, fetching your messages...</p>
 					</div>
-				)}
+				)} */}
 				{!selectedChatId && (
 					<div className="layout-empty-chat-area">
 						<p>Select a chat</p>
 					</div>
 				)}
-				{selectedChatId && !fetchingMessages && (
+				{selectedChatId && (
 					<React.Fragment>
 						<div className="layout-chat-area">
 							<ChatArea pageProps={pageProps} pageActions={pageActions} />

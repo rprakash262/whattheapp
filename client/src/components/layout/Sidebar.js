@@ -7,7 +7,7 @@ import Scrollable from '../scrollable';
 class Sidebar extends React.Component {
 	render() {
 		const { pageProps, pageActions } = this.props;
-		const { activeChats, selectedChatId } = pageProps;
+		const { activeChats, selectedChatId, messages, } = pageProps;
 		const { selectChat, toggleModal, filterChats } = pageActions;
 
 		return (
@@ -28,6 +28,7 @@ class Sidebar extends React.Component {
 							selectChat={() => selectChat(chat)}
 							name={chat.chatName}
 							lastMsg={chat.lastMsg}
+							unread={selectedChatId !== chat.chatId && messages[chat.chatId].length}
 						/>
 					))}
 				</Scrollable>

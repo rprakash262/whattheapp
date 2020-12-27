@@ -1,5 +1,4 @@
 const express = require('express');
-const fileUpload = require('express-fileupload');
 const router = express.Router();
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
@@ -7,16 +6,18 @@ const passport = require('passport');
 const path = require('path');
 var http = require('http');
 const socket = require('socket.io');
-const crypto = require('crypto');
-const GridFsStorage = require('multer-gridfs-storage');
-const Grid = require('gridfs-stream');
-const methodOverride = require('method-override');
-const multer = require('multer');
+// const fileUpload = require('express-fileupload');
+// const crypto = require('crypto');
+// const GridFsStorage = require('multer-gridfs-storage');
+// const Grid = require('gridfs-stream');
+// const methodOverride = require('method-override');
+// const multer = require('multer');
 
 const Conversation = require('./models/Conversation');
 
-options={
+const options={
   cors: true,
+  // origins: ["https://arcane-wildwood-43524.herokuapp.com"],
   origins: ["http://localhost:5000"],
 }
 
@@ -27,8 +28,6 @@ const api = require('./routes/api');
 // body-parser middleware
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
-app.use(fileUpload());
-// app.use(methodOverride('_method'));
 
 // DB config
 const db = require('./config/keys').mongoURI;
@@ -58,51 +57,43 @@ if (process.env.NODE_ENV === 'production') {
   })
 }
 
-const server = http.Server(app);
+// initialize IO
+const server = http.createServer(app);
+// const server = http.Server(app);
 var io = socket(server, options);
 io.listen(server);
 
-// let interval;
+// run when  client connects
+io.on('connection', socket => {
+  console.log('USER CONNECTED.............');
 
-io.on('connection', (socket) => {
-  console.log('User Connected====>>>>>>>>>>>');
-  
   socket.on('send-msg', async ({ selectedChatId: chatId, userId: authorId, textMsg: message, time, msgId }) => {
     const newMessage = {
       author: authorId,
       message,
       time,
+      status: 'sent'
     };
-    console.log('===============')
+
+    console.log(newMessage, '==>>')
+
     try {
       await Conversation.updateOne({ chatId }, { $addToSet: { conversation: newMessage } });
 
-      newMessage.id = msgId;
+      newMessage._id = msgId;
+      newMessage.status = 'delivered';
 
-      socket.broadcast.emit('receive-msg', newMessage);
-      // res.status(200).json({ success: true });
+      socket.broadcast.emit('receive-msg', { newMessage, chatId });
     } catch (err) {
       console.error(err);
       res.status(500).json({ success: false, result: 'Something went wrong' });
     }
   })
-	// if (interval) {
-	//     clearInterval(interval);
- //  	}
 
-	// interval = setInterval(() => getApiAndEmit(socket), 5000);
-
-	// socket.on("disconnect", () => {
-	//     console.log("Client disconnected");
-	//     clearInterval(interval);
-	// });
+	socket.on("disconnect", () => {
+	    console.log('USER DISCONNECTED............');
+	});
 });
-
-const getApiAndEmit = socket => {
-  const response = new Date();
-  // Emitting a new message. Will be consumed by the client
-  socket.emit("FromAPI", response);
-};
 
 const port = process.env.PORT || 5000;
 
