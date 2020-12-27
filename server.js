@@ -17,8 +17,8 @@ const Conversation = require('./models/Conversation');
 
 const options={
   cors: true,
-  // origins: ["https://arcane-wildwood-43524.herokuapp.com"],
-  origins: ["http://localhost:5000"],
+  origins: ["https://arcane-wildwood-43524.herokuapp.com"],
+  // origins: ["http://localhost:5000"],
 }
 
 const app = express();
