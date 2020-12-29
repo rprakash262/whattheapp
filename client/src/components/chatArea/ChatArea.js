@@ -21,6 +21,7 @@ class ChatArea extends React.Component {
 								msg={msg.message}
 								flexEnd={msg.author === userId}
 								status={msg.status}
+								time={msg.time}
 							/>
 						))}
 					</div>

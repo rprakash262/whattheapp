@@ -12,8 +12,8 @@ import {
 import { getUserCookie, deleteCookie } from '../cookie';
 import { setCurrentUser } from './LoginReducer';
 
-const ENDPOINT = 'https://arcane-wildwood-43524.herokuapp.com';
-// const ENDPOINT = 'http://localhost:5000';
+// const ENDPOINT = 'https://arcane-wildwood-43524.herokuapp.com';
+const ENDPOINT = 'http://localhost:5000';
 const socket = socketIOClient(ENDPOINT);
 
 const INIT = 'LayoutReducer/INIT';
@@ -242,17 +242,26 @@ const sendMsg = e => async (dispatch, getState) => {
     _id: id,
     author: userId,
     message: textMsg,
-    status: 'sent',
+    status: 'sending',
     time: new Date(),
   };
 
   const clonedMessages = cloneDeep(messages);
 
-  try {
-    await socket.emit('send-msg', { selectedChatId, userId, textMsg, time: new Date(), msgId: id });
+  clonedMessages[selectedChatId].push(newMsg);
+  dispatch(setMessages(clonedMessages));
+  scrollToBottom();
 
-    clonedMessages[selectedChatId].push(newMsg);
-    dispatch(setMessages(clonedMessages));
+  try {
+    await socket.emit('sending-msg', { selectedChatId, userId, textMsg, time: new Date(), msgId: id });
+
+    socket.on('msg-sent', async ({ newMessage, chatId }) => {
+      console.log('msg-sent=====>>>>>>>.', newMessage)
+      clonedMessages[chatId].find(d => d._id === newMessage._id).status = 'sent';
+      dispatch(setMessages(clonedMessages));
+      scrollToBottom();
+    })
+
     scrollToBottom();
     dispatch(changeTextMsg(''));
     dispatch(sendingMsg(false));

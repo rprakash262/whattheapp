@@ -17,8 +17,8 @@ const Conversation = require('./models/Conversation');
 
 const options={
   cors: true,
-  origins: ["https://arcane-wildwood-43524.herokuapp.com"],
-  // origins: ["http://localhost:5000"],
+  // origins: ["https://arcane-wildwood-43524.herokuapp.com"],
+  origins: ["http://localhost:5000"],
 }
 
 const app = express();
@@ -67,21 +67,22 @@ io.listen(server);
 io.on('connection', socket => {
   console.log('USER CONNECTED.............');
 
-  socket.on('send-msg', async ({ selectedChatId: chatId, userId: authorId, textMsg: message, time, msgId }) => {
+  socket.on('sending-msg', async ({ selectedChatId: chatId, userId: authorId, textMsg: message, time, msgId }) => {
     const newMessage = {
       author: authorId,
       message,
       time,
-      status: 'sent'
+      status: 'sent',
     };
 
-    console.log(newMessage, '==>>')
+    console.log(newMessage, '==>>');
 
     try {
       await Conversation.updateOne({ chatId }, { $addToSet: { conversation: newMessage } });
 
       newMessage._id = msgId;
-      newMessage.status = 'delivered';
+      
+      socket.emit('msg-sent', { newMessage, chatId });
 
       socket.broadcast.emit('receive-msg', { newMessage, chatId });
     } catch (err) {

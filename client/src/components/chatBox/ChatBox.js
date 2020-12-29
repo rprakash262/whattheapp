@@ -18,11 +18,19 @@ const getStatusIcon = status => {
 		default:
 			return <CheckIcon style={{ fontSize: '10px' }} />;
 	}
+};
+
+const getTime = time => {
+	const date = new Date(time);
+	const hrs = date.getHours();
+	const mins = date.getMinutes();
+
+	return `${hrs}:${mins}`;
 }
 
 class ChatBox extends React.Component {
 	render() {
-		const { msg, status, flexEnd } = this.props;
+		const { msg, status, flexEnd, time } = this.props;
 
 		return (
 			<div
@@ -32,10 +40,14 @@ class ChatBox extends React.Component {
 				<div className="chat-box">
 					{msg}
 				</div>
-				<p>{flexEnd && (
-					<React.Fragment>
-						{getStatusIcon(status)} {status}
-					</React.Fragment>)}
+				<p>
+					<span>{getTime(time)}</span>
+					{flexEnd && (
+						<React.Fragment>
+							<span>{getStatusIcon(status)}</span>
+							<span>{status}</span>
+						</React.Fragment>
+					)}
 				</p>
 			</div>
 		)
